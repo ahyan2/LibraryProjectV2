@@ -98,6 +98,31 @@ char validChoice(){
 }
 
 
+UserAction getUserAction() {
+    int choice;
+    while (true) {
+        cout
+          << "\nWhat would you like to do?\n"
+          << "  1. Check out book\n"
+          << "  2. Check in book\n"
+          << "  3. View library catalog\n"
+          << "  4. View overview of a book\n"
+          << "  5. Leave\n"
+          << "Enter choice [1-5]: ";
+
+        if (!(cin >> choice) || choice < 1 || choice > 5) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid choice. Please enter 1–5.\n";
+        } else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return static_cast<UserAction>(choice);
+        }
+    }
+}
+
+
+
 void displayWelcome(){
     cout << setw(40) << setfill('=') << " " << setfill(' ') << endl;
     cout << "Hello, welcome to the virtual library!" << endl;

@@ -6,6 +6,19 @@
 
 using namespace std;
 
+enum UserAction {
+    CheckOut = 1,  // Check out a book
+    CheckIn = 2,  // Check in a book
+    ViewLibrary = 3,  // View entire catalog
+    ViewOverview = 4,  // View overview of a book
+    LeaveProgram = 5   // Leave the program
+};
+
+// Reads and validates a choice [1–5], returns a UserAction
+UserAction getUserAction();
+
+
+
 extern string name;
 extern int studentID;
 
