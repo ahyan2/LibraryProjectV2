@@ -48,6 +48,8 @@ void exportCatalog(const string &filename, bool onlyAvailable); // Export catalo
 
 void saveCatalogBinary(const string &filename);     // Save current catalog to a binary file
 
+void loadCatalogBinary(const string &filename);
+
 vector<Book> getCatalogSortedByTitle();
 
 vector<Book> getCatalogSortedByAuthor();
