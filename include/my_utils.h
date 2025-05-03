@@ -4,6 +4,9 @@
 #include <string>   // for strings
 #include <thread>   // for time delay
 #include <vector>
+#include <unordered_map>
+#include <memory>
+#include <fstream>
 
 using namespace std;
 
@@ -30,10 +33,16 @@ struct Book {
     string genre;
 };
 
-extern vector<Book> catalog;    // All available books
 
-extern vector<Book> removedBooks; // Books checked out (removed from catalog)
+extern unordered_map<int, Book> catalog;    //  bookID , Book
 
+extern unordered_map<int, unique_ptr<Book>> checkedOutBooks;    // studentID, unique_ptr<Book>
+
+void saveFeedback(const string &feedback);  // Append user feedback to a text file
+
+void exportCatalog(const string &filename, bool onlyAvailable); // Export catalog to CSV/TXT (all or only available)
+
+void saveCatalogBinary(const string &filename);     // Save current catalog to a binary file
 
 int validID(int givenDigits);
 
