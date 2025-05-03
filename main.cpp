@@ -9,7 +9,6 @@ int main() {
     displayWelcome();
     displayBooks();
     userCatalogInteraction();
-    displayGoodbye();
 
     return 0;
 }

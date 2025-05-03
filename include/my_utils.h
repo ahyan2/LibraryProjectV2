@@ -3,6 +3,7 @@
 
 #include <string>   // for strings
 #include <thread>   // for time delay
+#include <vector>
 
 using namespace std;
 
@@ -22,16 +23,16 @@ UserAction getUserAction();
 extern string name;
 extern int studentID;
 
-extern vector<int> numberID;
-extern vector<string> author;
-extern vector<string> title;
-extern vector<string> genre;
+struct Book {
+    int id;
+    string author;
+    string title;
+    string genre;
+};
 
+extern vector<Book> catalog;    // All available books
 
-extern vector<int> removedNumberID;
-extern vector<string> removedAuthor;
-extern vector<string> removedTitle;
-extern vector<string> removedGenre;
+extern vector<Book> removedBooks; // Books checked out (removed from catalog)
 
 
 int validID(int givenDigits);

@@ -13,16 +13,15 @@ using namespace std;
 string name;
 int studentID;
 
-vector<int> numberID = {1, 2, 3, 4, 5};;
-vector<string> author = {"George Orwell", "Harper Lee", "Suzanne Collins", "George Orwell", "Andy Weir"};;
-vector<string> title = {"Animal Farm", "To Kill a Mockingbird", "The Hunger Games", "1984", "The Martian"};
-vector<string> genre = {"Satire", "Historic Fiction", "Dystopia", "Dystopia", "SciFi" };
+vector<Book> catalog = {
+    {11111, "George Orwell",   "Animal Farm",            "Satire"},
+    {11112, "Harper Lee",      "To Kill a Mockingbird",  "Historic Fiction"},
+    {11113, "Suzanne Collins", "The Hunger Games",       "Dystopia"},
+    {11114, "George Orwell",   "1984",                   "Dystopia"},
+    {11115, "Andy Weir",       "The Martian",            "SciFi"}
+};
 
-
-vector<int> removedNumberID;
-vector<string> removedAuthor;
-vector<string> removedTitle;
-vector<string> removedGenre;
+vector<Book> removedBooks;
 
 
 int validID(int givenDigits){
@@ -169,50 +168,52 @@ void displayBooks(){
     cout << "Hello " << name << ", here is our library catalog!" << endl << endl;
 
     cout << right << setw(47) << "* Current Books *" << endl;
+    cout << left  << setw(10) << "ID"
+                  << setw(25) << "Author"
+                  << setw(20) << "Genre"
+                  << "Title" << endl;
+    cout << setw(80) << setfill('-') << "" << setfill(' ') << endl;
 
-    cout << left << setw(20) << "ID" << setw(20) << "Author" << setw(20) << "Genre" << "Title" << endl;
-
-    cout << setw(80) << setfill('-') << "" << endl;
-
-    for(int i = 0; i < numberID.size(); i++){
-        cout << right << setw(5) << setfill('1') << numberID[i] << setfill(' ') << setw(10) << "" << left << setw(20) << author[i] << setw(20) << genre[i] << setw(20) << title[i] << endl;
+    for (const auto &book : catalog) {
+        cout << setw(10) << book.id
+             << setw(25) << book.author
+             << setw(20) << book.genre
+             << book.title << endl;
     }
-
 }
 
 
 void checkOut() {
-    // Prevent double-checkout
-    if (!removedNumberID.empty()) {
+    // Prevent double‑checkout
+    if (!removedBooks.empty()) {
         cout << "You already have a book checked out. Return it before checking out another.\n";
         return;
     }
 
     while (true) {
-        cout << "Enter the 5-digit book ID:" << endl;
-        int arrIndex = -1;
-        while (true) {
-            int bookID = validID(5);
-            if (bookID >= 11111 && bookID <= 11115) {
-                arrIndex = (bookID % 10) - 1;
+        cout << "Enter the 5‑digit book ID:" << endl;
+        int bookID = validID(5);
+
+        // Manually search for the book by index
+        int idx = -1;
+        for (int i = 0; i < (int)catalog.size(); ++i) {
+            if (catalog[i].id == bookID) {
+                idx = i;
                 break;
-            } else {
-                cout << "Invalid, try again." << endl;
             }
         }
+        if (idx < 0) {
+            cout << "Invalid ID or not available. Try again." << endl;
+            continue;
+        }
+
         cout << "Is this the book you would like to checkout?" << endl;
-        cout << "*** " << title[arrIndex] << ", by " << author[arrIndex] << " ***" << endl;
+        cout << "*** " << catalog[idx].title << ", by " << catalog[idx].author << " ***" << endl;
         char choice = validChoice();
         if (choice == 'y') {
-            removedNumberID.push_back(numberID[arrIndex]);
-            removedAuthor.push_back(author[arrIndex]);
-            removedGenre.push_back(genre[arrIndex]);
-            removedTitle.push_back(title[arrIndex]);
-
-            numberID.erase(numberID.begin() + arrIndex);
-            author.erase(author.begin() + arrIndex);
-            genre.erase(genre.begin() + arrIndex);
-            title.erase(title.begin() + arrIndex);
+            // move out of catalog into removedBooks
+            removedBooks.push_back(catalog[idx]);
+            catalog.erase(catalog.begin() + idx);
             break;
         }
     }
@@ -220,44 +221,36 @@ void checkOut() {
 
 
 
+
+
 bool checkIn() {
     // Prevent check‑in when none checked out
-    if (removedNumberID.empty()) {
+    if (removedBooks.empty()) {
         cout << "No books to check in.\n";
         return false;
     }
 
-    for (int index = 0; index < numberID.size(); index++) {
-        if (removedNumberID[0] < numberID[index]) {
-            numberID.insert(numberID.begin() + index, removedNumberID[0]);
-            author.insert(author.begin() + index, removedAuthor[0]);
-            genre.insert(genre.begin() + index, removedGenre[0]);
-            title.insert(title.begin() + index, removedTitle[0]);
+    // Take the first removed book
+    Book toReturn = removedBooks[0];
+    removedBooks.erase(removedBooks.begin());
 
-            removedNumberID.erase(removedNumberID.begin());
-            removedAuthor.erase(removedAuthor.begin());
-            removedGenre.erase(removedGenre.begin());
-            removedTitle.erase(removedTitle.begin());
-
-            displayBooks();
-            return true;
+    // Manually find insertion point so catalog stays sorted by ID
+    int insertPos = (int)catalog.size();  // default to end
+    for (int i = 0; i < (int)catalog.size(); ++i) {
+        if (toReturn.id < catalog[i].id) {
+            insertPos = i;
+            break;
         }
     }
 
-    // If it belongs at the end
-    numberID.push_back(removedNumberID[0]);
-    author.push_back(removedAuthor[0]);
-    genre.push_back(removedGenre[0]);
-    title.push_back(removedTitle[0]);
-
-    removedNumberID.erase(removedNumberID.begin());
-    removedAuthor.erase(removedAuthor.begin());
-    removedGenre.erase(removedGenre.begin());
-    removedTitle.erase(removedTitle.begin());
+    // Insert back into catalog at the correct position
+    catalog.insert(catalog.begin() + insertPos, toReturn);
 
     displayBooks();
     return true;
 }
+
+
 
 
 
@@ -309,7 +302,7 @@ void userCatalogInteraction() {
                 break;
 
             case LeaveProgram:
-                if (!removedNumberID.empty()) {
+                if (!removedBooks.empty()) {
                     cout << "You still have a book checked out. Please return it before exiting.\n";
                     break;
                 }
@@ -319,4 +312,5 @@ void userCatalogInteraction() {
         this_thread::sleep_for(chrono::seconds(1));
     }
 }
+
 
