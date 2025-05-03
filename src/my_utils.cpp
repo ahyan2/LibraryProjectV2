@@ -5,6 +5,9 @@
 #include <iomanip>  // for display manip
 #include <chrono>   // for time delay
 #include <thread>   // for time delay
+#include <limits>
+#include <unordered_map>
+#include <memory>
 
 
 using namespace std;
@@ -13,15 +16,15 @@ using namespace std;
 string name;
 int studentID;
 
-vector<Book> catalog = {
-    {11111, "George Orwell",   "Animal Farm",            "Satire"},
-    {11112, "Harper Lee",      "To Kill a Mockingbird",  "Historic Fiction"},
-    {11113, "Suzanne Collins", "The Hunger Games",       "Dystopia"},
-    {11114, "George Orwell",   "1984",                   "Dystopia"},
-    {11115, "Andy Weir",       "The Martian",            "SciFi"}
+unordered_map<int, Book> catalog = {
+    {11111, {11111, "George Orwell",   "Animal Farm",           "Satire"}},
+    {11112, {11112, "Harper Lee",      "To Kill a Mockingbird", "Historic Fiction"}},
+    {11113, {11113, "Suzanne Collins", "The Hunger Games",      "Dystopia"}},
+    {11114, {11114, "George Orwell",   "1984",                  "Dystopia"}},
+    {11115, {11115, "Andy Weir",       "The Martian",           "SciFi"}}
 };
 
-vector<Book> removedBooks;
+unordered_map<int, unique_ptr<Book>> checkedOutBooks;
 
 
 int validID(int givenDigits){
