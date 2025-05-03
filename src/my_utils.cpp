@@ -181,13 +181,19 @@ void displayBooks(){
 }
 
 
-void checkOut(){
-    while (true){
+void checkOut() {
+    // Prevent double-checkout
+    if (!removedNumberID.empty()) {
+        cout << "You already have a book checked out. Return it before checking out another.\n";
+        return;
+    }
+
+    while (true) {
         cout << "Enter the 5-digit book ID:" << endl;
         int arrIndex = -1;
-        while(true){
+        while (true) {
             int bookID = validID(5);
-            if (bookID >= 11111 && bookID <= 11115){
+            if (bookID >= 11111 && bookID <= 11115) {
                 arrIndex = (bookID % 10) - 1;
                 break;
             } else {
@@ -197,13 +203,13 @@ void checkOut(){
         cout << "Is this the book you would like to checkout?" << endl;
         cout << "*** " << title[arrIndex] << ", by " << author[arrIndex] << " ***" << endl;
         char choice = validChoice();
-        if (choice == 'y'){
-            removedNumberID.push_back(numberID[arrIndex]);      // adds value at arrIndex to vector
+        if (choice == 'y') {
+            removedNumberID.push_back(numberID[arrIndex]);
             removedAuthor.push_back(author[arrIndex]);
             removedGenre.push_back(genre[arrIndex]);
             removedTitle.push_back(title[arrIndex]);
 
-            numberID.erase(numberID.begin() + arrIndex);     // removes value at arrIndex from vector
+            numberID.erase(numberID.begin() + arrIndex);
             author.erase(author.begin() + arrIndex);
             genre.erase(genre.begin() + arrIndex);
             title.erase(title.begin() + arrIndex);
@@ -213,9 +219,16 @@ void checkOut(){
 }
 
 
-bool checkIn(){
-    for (int index = 0; index < numberID.size();  index++){
-        if (removedNumberID[0] < numberID[index]){
+
+bool checkIn() {
+    // Prevent check‑in when none checked out
+    if (removedNumberID.empty()) {
+        cout << "No books to check in.\n";
+        return false;
+    }
+
+    for (int index = 0; index < numberID.size(); index++) {
+        if (removedNumberID[0] < numberID[index]) {
             numberID.insert(numberID.begin() + index, removedNumberID[0]);
             author.insert(author.begin() + index, removedAuthor[0]);
             genre.insert(genre.begin() + index, removedGenre[0]);
@@ -226,18 +239,26 @@ bool checkIn(){
             removedGenre.erase(removedGenre.begin());
             removedTitle.erase(removedTitle.begin());
 
-            displayBooks();     // will only display books again once user checks book back in via this function.
-            return true;    // doesn't execute final code segment if book info already inserted (true value doesn't matter)
+            displayBooks();
+            return true;
         }
     }
+
+    // If it belongs at the end
     numberID.push_back(removedNumberID[0]);
     author.push_back(removedAuthor[0]);
     genre.push_back(removedGenre[0]);
     title.push_back(removedTitle[0]);
 
+    removedNumberID.erase(removedNumberID.begin());
+    removedAuthor.erase(removedAuthor.begin());
+    removedGenre.erase(removedGenre.begin());
+    removedTitle.erase(removedTitle.begin());
+
     displayBooks();
-    return true;    // in case element removed was largest in original arrays. (true value doesn't matter)
+    return true;
 }
+
 
 
 void awaitingCheckIn(){
@@ -266,27 +287,36 @@ void awaitingCheckIn(){
 }
 
 
-void userCatalogInteraction(){
-    this_thread::sleep_for(chrono::seconds(2));
-    cout << endl << "Would you like to checkout a book?" << endl;
-    char choice = validChoice();
-    if (choice == 'y'){
-        checkOut();
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << endl;
-        displayBooks();
+void userCatalogInteraction() {
+    while (true) {
+        UserAction action = getUserAction();
+        switch (action) {
+            case CheckOut:
+                checkOut();
+                break;
 
-        this_thread::sleep_for(chrono::seconds(1));
+            case CheckIn:
+                if (!checkIn())
+                    cout << "Nothing to check in.\n";
+                break;
 
-        cout << endl << "Would you like to check-in your book?" << endl;       // only able to check in book after checking out a book
-        choice = validChoice();
-        if (choice == 'y'){
-            checkIn();
-            this_thread::sleep_for(chrono::seconds(1));
-            cout << endl << "Thank you " << name << " for returning your book!" << endl << endl;
-            this_thread::sleep_for(chrono::seconds(1));
-        } else{
-            awaitingCheckIn();
+            case ViewLibrary:
+                displayBooks();
+                break;
+
+            case ViewOverview:
+                cout << "Overview feature coming soon.\n";
+                break;
+
+            case LeaveProgram:
+                if (!removedNumberID.empty()) {
+                    cout << "You still have a book checked out. Please return it before exiting.\n";
+                    break;
+                }
+                displayGoodbye();
+                return;
         }
+        this_thread::sleep_for(chrono::seconds(1));
     }
 }
+
