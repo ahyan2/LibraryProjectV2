@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <memory>
 #include <fstream>
+#include <algorithm>    // for sort()
+
 
 using namespace std;
 
@@ -15,7 +17,9 @@ enum UserAction {
     CheckIn = 2,  // Check in a book
     ViewLibrary = 3,  // View entire catalog
     ViewOverview = 4,  // View overview of a book
-    LeaveProgram = 5   // Leave the program
+    LeaveProgram = 5,   // Leave the program
+    SortByTitle  = 6,   // sort catalog by title
+    SortByAuthor = 7    // sort catalog by author
 };
 
 // Reads and validates a choice [1–5], returns a UserAction
@@ -43,6 +47,10 @@ void saveFeedback(const string &feedback);  // Append user feedback to a text fi
 void exportCatalog(const string &filename, bool onlyAvailable); // Export catalog to CSV/TXT (all or only available)
 
 void saveCatalogBinary(const string &filename);     // Save current catalog to a binary file
+
+vector<Book> getCatalogSortedByTitle();
+
+vector<Book> getCatalogSortedByAuthor();
 
 int validID(int givenDigits);
 

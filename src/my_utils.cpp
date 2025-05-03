@@ -8,6 +8,8 @@
 #include <limits>
 #include <unordered_map>
 #include <memory>
+#include <vector>
+#include <algorithm>
 
 
 using namespace std;
@@ -110,9 +112,12 @@ UserAction getUserAction() {
           << "  3. View library catalog\n"
           << "  4. View overview of a book\n"
           << "  5. Leave\n"
-          << "Enter choice [1-5]: ";
+          << "  6. Sort catalog by title\n"
+          << "  7. Sort catalog by author\n"
+          << "Enter choice [1-7]: ";
 
-        if (!(cin >> choice) || choice < 1 || choice > 5) {
+
+        if (!(cin >> choice) || choice < 1 || choice > 7) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Invalid choice. Please enter 1–5.\n";
@@ -297,9 +302,55 @@ void userCatalogInteraction() {
                 }
                 displayGoodbye();
                 return;
+
+            case SortByTitle: {
+                auto list = getCatalogSortedByTitle();
+                cout << "\nCatalog sorted by title:\n";
+                for (auto &b : list) {
+                    cout << b.id << " | " << b.author << " | "
+                         << b.genre << " | " << b.title << "\n";
+                }
+                break;
+            }
+
+            case SortByAuthor: {
+                auto list = getCatalogSortedByAuthor();
+                cout << "\nCatalog sorted by author:\n";
+                for (auto &b : list) {
+                    cout << b.id << " | " << b.author << " | "
+                         << b.genre << " | " << b.title << "\n";
+                }
+                break;
+            }
         }
         this_thread::sleep_for(chrono::seconds(1));
     }
+}
+
+vector<Book> getCatalogSortedByTitle() {
+    vector<Book> books;
+    books.reserve(catalog.size());
+    for (auto &p : catalog) {
+        books.push_back(p.second);
+    }
+    sort(books.begin(), books.end(),
+         [](const Book &a, const Book &b) {
+             return a.title < b.title;
+         });
+    return books;
+}
+
+vector<Book> getCatalogSortedByAuthor() {
+    vector<Book> books;
+    books.reserve(catalog.size());
+    for (auto &p : catalog) {
+        books.push_back(p.second);
+    }
+    sort(books.begin(), books.end(),
+         [](const Book &a, const Book &b) {
+             return a.author < b.author;
+         });
+    return books;
 }
 
 
