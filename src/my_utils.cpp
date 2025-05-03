@@ -164,9 +164,8 @@ void displayGoodbye(){
     cout << setw(60) << setfill('*') << " " << setfill(' ') << endl;
 }
 
-void displayBooks(){
+void displayBooks() {
     cout << setw(40) << setfill('=') << " " << setfill(' ') << endl;
-
     this_thread::sleep_for(chrono::seconds(1));
     cout << "Hello " << name << ", here is our library catalog!" << endl << endl;
 
@@ -177,18 +176,20 @@ void displayBooks(){
                   << "Title" << endl;
     cout << setw(80) << setfill('-') << "" << setfill(' ') << endl;
 
-    for (const auto &book : catalog) {
-        cout << setw(10) << book.id
-             << setw(25) << book.author
-             << setw(20) << book.genre
-             << book.title << endl;
+    for (const auto &entry : catalog) {
+        const Book &b = entry.second;
+        cout << setw(10) << b.id
+             << setw(25) << b.author
+             << setw(20) << b.genre
+             << b.title << endl;
     }
 }
 
 
+
 void checkOut() {
-    // Prevent double‑checkout
-    if (!removedBooks.empty()) {
+    // ensure one book per user
+    if (checkedOutBooks.count(studentID)) {
         cout << "You already have a book checked out. Return it before checking out another.\n";
         return;
     }
@@ -197,61 +198,46 @@ void checkOut() {
         cout << "Enter the 5‑digit book ID:" << endl;
         int bookID = validID(5);
 
-        // Manually search for the book by index
-        int idx = -1;
-        for (int i = 0; i < (int)catalog.size(); ++i) {
-            if (catalog[i].id == bookID) {
-                idx = i;
-                break;
-            }
-        }
-        if (idx < 0) {
-            cout << "Invalid ID or not available. Try again." << endl;
+        auto it = catalog.find(bookID);
+        if (it == catalog.end()) {
+            cout << "Invalid ID or not available. Try again.\n";
             continue;
         }
 
-        cout << "Is this the book you would like to checkout?" << endl;
-        cout << "*** " << catalog[idx].title << ", by " << catalog[idx].author << " ***" << endl;
+        const Book &b = it->second;
+        cout << "Is this the book you would like to checkout?\n"
+             << "*** " << b.title << ", by " << b.author << " ***\n";
         char choice = validChoice();
         if (choice == 'y') {
-            // move out of catalog into removedBooks
-            removedBooks.push_back(catalog[idx]);
-            catalog.erase(catalog.begin() + idx);
+            // move into smart pointer map
+            checkedOutBooks[studentID] = make_unique<Book>(b);
+            catalog.erase(it);
             break;
         }
     }
 }
+
 
 
 
 
 
 bool checkIn() {
-    // Prevent check‑in when none checked out
-    if (removedBooks.empty()) {
+    auto it = checkedOutBooks.find(studentID);
+    if (it == checkedOutBooks.end()) {
         cout << "No books to check in.\n";
         return false;
     }
 
-    // Take the first removed book
-    Book toReturn = removedBooks[0];
-    removedBooks.erase(removedBooks.begin());
-
-    // Manually find insertion point so catalog stays sorted by ID
-    int insertPos = (int)catalog.size();  // default to end
-    for (int i = 0; i < (int)catalog.size(); ++i) {
-        if (toReturn.id < catalog[i].id) {
-            insertPos = i;
-            break;
-        }
-    }
-
-    // Insert back into catalog at the correct position
-    catalog.insert(catalog.begin() + insertPos, toReturn);
+    // move book back into catalog
+    unique_ptr<Book> returned = move(it->second);
+    catalog[returned->id] = *returned;
+    checkedOutBooks.erase(it);
 
     displayBooks();
     return true;
 }
+
 
 
 
@@ -305,7 +291,7 @@ void userCatalogInteraction() {
                 break;
 
             case LeaveProgram:
-                if (!removedBooks.empty()) {
+                if (checkedOutBooks.count(studentID)) {
                     cout << "You still have a book checked out. Please return it before exiting.\n";
                     break;
                 }
@@ -315,5 +301,6 @@ void userCatalogInteraction() {
         this_thread::sleep_for(chrono::seconds(1));
     }
 }
+
 
 
