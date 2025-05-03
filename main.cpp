@@ -1,8 +1,15 @@
-#include <iostream>
+#include "include/my_utils.h"     // contains validChoice, validFirstName, validStudentID
+
+#include <iostream> // for print
 
 using namespace std;
 
+
 int main() {
-    cout << "Hello" << endl;
+    displayWelcome();
+    displayBooks();
+    userCatalogInteraction();
+    displayGoodbye();
+
     return 0;
 }
