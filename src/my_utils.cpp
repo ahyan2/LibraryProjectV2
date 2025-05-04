@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <map>
 
 
 using namespace std;
@@ -28,6 +29,8 @@ unordered_map<int, Book> catalog = {
 };
 
 unordered_map<int, unique_ptr<Book>> checkedOutBooks;
+
+map<int, shared_ptr<Book>> borrowHistory;
 
 
 int validID(int givenDigits){
@@ -217,6 +220,11 @@ void checkOut() {
         if (choice == 'y') {
             // move into smart pointer map
             checkedOutBooks[studentID] = make_unique<Book>(b);
+
+            // record into borrowHistory as a shared_ptr
+            borrowHistory[studentID] = make_shared<Book>(b);
+            showBorrowHistory();
+
             catalog.erase(it);
             break;
         }
@@ -377,6 +385,18 @@ vector<Book> getCatalogSortedByAuthor() {
              return a.author < b.author;
          });
     return books;
+}
+
+void showBorrowHistory() {
+    // If this user has borrowed before, print the last one
+    auto it = borrowHistory.find(studentID);
+    if (it == borrowHistory.end()) {
+        cout << "You have no borrow history.\n";
+    } else {
+        auto& b = *it->second;  // shared_ptr<Book>
+        cout << "Your last borrowed book was: ["
+             << b.id << "] " << b.title << " by " << b.author << "\n";
+    }
 }
 
 

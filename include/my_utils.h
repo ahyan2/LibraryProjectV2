@@ -8,6 +8,7 @@
 #include <memory>
 #include <fstream>
 #include <algorithm>    // for sort()
+#include <map>
 
 
 using namespace std;
@@ -41,6 +42,10 @@ struct Book {
 extern unordered_map<int, Book> catalog;    //  bookID , Book
 
 extern unordered_map<int, unique_ptr<Book>> checkedOutBooks;    // studentID, unique_ptr<Book>
+
+extern map<int, shared_ptr<Book>> borrowHistory;   // borrow history by studentID, keeps a shared_ptr to each Book
+
+void showBorrowHistory();   // each user’s last borrowed book
 
 void saveFeedback(const string &feedback);  // Append user feedback to a text file
 
