@@ -226,8 +226,6 @@ void checkOut() {
 
 
 
-
-
 bool checkIn() {
     auto it = checkedOutBooks.find(studentID);
     if (it == checkedOutBooks.end()) {
@@ -246,7 +244,34 @@ bool checkIn() {
 
 
 
+void displayOverview() {
+    cout << "Enter the 5‑digit book ID to view its overview: ";
+    int bookID = validID(5);
 
+    // Check if the book is in catalog or currently checked out by this user
+    bool inCatalog    = catalog.count(bookID);
+    bool inCheckedOut = checkedOutBooks.count(studentID) &&
+                        checkedOutBooks[studentID]->id == bookID;
+    if (!inCatalog && !inCheckedOut) {
+        cout << "Book ID not found in catalog or your checked‑out list.\n";
+        return;
+    }
+
+    // Build the path: overviews/<ID>.txt
+    string filename = "../overviews/" + to_string(bookID) + ".txt"; // go up from working directory (cmake debug) then proceed
+    ifstream ifs(filename);
+    if (!ifs.is_open()) {
+        cout << "No overview file found for book " << bookID << ".\n";
+        return;
+    }
+
+    cout << "\n─── Overview for Book " << bookID << " ───\n";
+    string line;
+    while (getline(ifs, line)) {
+        cout << line << "\n";
+    }
+    cout << "────────────────────────────────────\n";
+}
 
 
 void awaitingCheckIn(){
@@ -293,7 +318,7 @@ void userCatalogInteraction() {
                 break;
 
             case ViewOverview:
-                cout << "Overview feature coming soon.\n";
+                displayOverview();
                 break;
 
             case LeaveProgram:

@@ -66,6 +66,8 @@ void displayWelcome();
 
 void displayGoodbye();
 
+void displayOverview();
+
 void displayBooks();
 
 void checkOut();
