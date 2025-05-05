@@ -1,4 +1,6 @@
-#include "include/my_utils.h"     // contains validChoice, validFirstName, validStudentID
+#include "../include/my_utils.h"
+#include "../include/library.h"
+#include "../include/file_io.h"
 
 #include <iostream> // for print
 

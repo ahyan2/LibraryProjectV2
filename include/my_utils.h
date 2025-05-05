@@ -31,33 +31,6 @@ UserAction getUserAction();
 extern string name;
 extern int studentID;
 
-struct Book {
-    int id;
-    string author;
-    string title;
-    string genre;
-};
-
-
-extern unordered_map<int, Book> catalog;    //  bookID , Book
-
-extern unordered_map<int, unique_ptr<Book>> checkedOutBooks;    // studentID, unique_ptr<Book>
-
-extern map<int, shared_ptr<Book>> borrowHistory;   // borrow history by studentID, keeps a shared_ptr to each Book
-
-void showBorrowHistory();   // each user’s last borrowed book
-
-void saveFeedback(const string &feedback);  // Append user feedback to a text file
-
-void exportCatalog(const string &filename, bool onlyAvailable); // Export catalog to CSV/TXT (all or only available)
-
-void saveCatalogBinary(const string &filename);     // Save current catalog to a binary file
-
-void loadCatalogBinary(const string &filename);
-
-vector<Book> getCatalogSortedByTitle();
-
-vector<Book> getCatalogSortedByAuthor();
 
 int validID(int givenDigits);
 
@@ -65,15 +38,6 @@ string validFirstName();
 
 char validChoice();
 
-void userCatalogInteraction();
-
-void displayWelcome();
-
-void displayGoodbye();
-
-void displayOverview();
-
-void displayBooks();
 
 void checkOut();
 
