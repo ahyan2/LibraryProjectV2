@@ -1,3 +1,8 @@
+# UPDATE: Project 3 Code Restructuring
+
+
+
+
 Overview: A C++ interactive library catalog that uses advanced data structures, 
 smart pointers, and file I/O to let users browse, check out/in books, view overviews, save state, 
 export data, and leave feedback.
