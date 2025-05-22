@@ -1,5 +1,5 @@
-#include "../include/library.h"
-#include "../include/book.h"
+#include "../include/Library.h"
+#include "../include/Book.h"
 #include <iostream> // for print
 #include <string>   // for strings
 #include <iomanip>  // for display manip
@@ -15,20 +15,16 @@
 
 using namespace std;
 
-unordered_map<int, Book> catalog = {
-    {11111, Book{11111, "George Orwell",   "Animal Farm",           "Satire"}},
-    {11112, Book{11112, "Harper Lee",      "To Kill a Mockingbird", "Historic Fiction"}},
-    {11113, Book{11113, "Suzanne Collins", "The Hunger Games",      "Dystopia"}},
-    {11114, Book{11114, "George Orwell",   "1984",                  "Dystopia"}},
-    {11115, Book{11115, "Andy Weir",       "The Martian",           "SciFi"}}
-};
+Library::Library() : catalog{
+        {11111, Book{11111, "George Orwell",   "Animal Farm",           "Satire"}},
+        {11112, Book{11112, "Harper Lee",      "To Kill a Mockingbird", "Historic Fiction"}},
+        {11113, Book{11113, "Suzanne Collins", "The Hunger Games",      "Dystopia"}},
+        {11114, Book{11114, "George Orwell",   "1984",                  "Dystopia"}},
+        {11115, Book{11115, "Andy Weir",       "The Martian",           "SciFi"}}
+    }
+{}
 
-unordered_map<int, unique_ptr<Book>> checkedOutBooks;
-
-map<int, shared_ptr<Book>> borrowHistory;
-
-
-void displayWelcome(){
+void Library::displayWelcome(){
     cout << setw(40) << setfill('=') << " " << setfill(' ') << endl;
     cout << "Hello, welcome to the virtual library!" << endl;
     this_thread::sleep_for(chrono::seconds(2));
@@ -59,7 +55,7 @@ void displayWelcome(){
 
 
 
-void displayGoodbye(){
+void Library::displayGoodbye(){
     cout << setw(60) << setfill('*') << " " << setfill(' ') << endl;
 
     cout << "Thank you " << name << " for visiting our virtual library, We hope to see you again soon!" << endl;
@@ -67,7 +63,7 @@ void displayGoodbye(){
     cout << setw(60) << setfill('*') << " " << setfill(' ') << endl;
 }
 
-void displayBooks() {
+void Library::displayBooks() {
     cout << setw(40) << setfill('=') << " " << setfill(' ') << endl;
     this_thread::sleep_for(chrono::seconds(1));
     cout << "Hello " << name << ", here is our library catalog!" << endl << endl;
@@ -88,7 +84,7 @@ void displayBooks() {
     }
 }
 
-void displayOverview() {
+void Library::displayOverview() {
     cout << "Enter the 5‑digit book ID to view its overview: ";
     int bookID = validID(5);
 
@@ -117,7 +113,7 @@ void displayOverview() {
     cout << "────────────────────────────────────\n";
 }
 
-void checkOut() {
+void Library::checkOut() {
     // ensure one book per user
     if (checkedOutBooks.count(studentID)) {
         cout << "You already have a book checked out. Return it before checking out another.\n";
@@ -155,7 +151,7 @@ void checkOut() {
 
 
 
-bool checkIn() {
+bool Library::checkIn() {
     auto it = checkedOutBooks.find(studentID);
     if (it == checkedOutBooks.end()) {
         cout << "No books to check in.\n";
@@ -173,7 +169,7 @@ bool checkIn() {
 
 
 
-void awaitingCheckIn(){
+void Library::awaitingCheckIn(){
     this_thread::sleep_for(chrono::seconds(1));
     for(int i = 0; i < 15; i++){
         cout << '.' << endl;
@@ -198,7 +194,7 @@ void awaitingCheckIn(){
     }
 }
 
-vector<Book> getCatalogSortedByTitle() {
+vector<Book> Library::getCatalogSortedByTitle() {
     vector<Book> books;
     books.reserve(catalog.size());
     for (auto &p : catalog) {
@@ -211,7 +207,7 @@ vector<Book> getCatalogSortedByTitle() {
     return books;
 }
 
-vector<Book> getCatalogSortedByAuthor() {
+vector<Book> Library::getCatalogSortedByAuthor() {
     vector<Book> books;
     books.reserve(catalog.size());
     for (auto &p : catalog) {
@@ -224,7 +220,7 @@ vector<Book> getCatalogSortedByAuthor() {
     return books;
 }
 
-void showBorrowHistory() {
+void Library::showBorrowHistory() {
     // If this user has borrowed before, print the last one
     auto it = borrowHistory.find(studentID);
     if (it == borrowHistory.end()) {
@@ -236,7 +232,7 @@ void showBorrowHistory() {
     }
 }
 
-void userCatalogInteraction() {
+void Library::userCatalogInteraction() {
     while (true) {
         UserAction action = getUserAction();
         switch (action) {

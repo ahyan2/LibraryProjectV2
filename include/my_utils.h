@@ -23,14 +23,11 @@ enum UserAction {
     SortByAuthor = 7    // sort catalog by author
 };
 
-// Reads and validates a choice [1–5], returns a UserAction
-UserAction getUserAction();
-
-
-
 extern string name;
 extern int studentID;
 
+// Reads and validates a choice [1–5], returns a UserAction
+UserAction getUserAction();
 
 int validID(int givenDigits);
 
@@ -39,11 +36,6 @@ string validFirstName();
 char validChoice();
 
 
-void checkOut();
-
-bool checkIn();
-
-void awaitingCheckIn();
 
 
 #endif

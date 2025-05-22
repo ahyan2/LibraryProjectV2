@@ -1,5 +1,5 @@
 #include "../include/my_utils.h"
-#include "../include/library.h"
+#include "../include/Library.h"
 #include "../include/file_io.h"
 
 #include <iostream> // for print
@@ -8,10 +8,11 @@ using namespace std;
 
 
 int main() {
+    Library lib;
     loadCatalogBinary("catalog.bin");
-    displayWelcome();
-    displayBooks();
-    userCatalogInteraction();
+    lib.displayWelcome();
+    lib.displayBooks();
+    lib.userCatalogInteraction();
 
     // Prompt for feedback
     cout << "\nPlease provide feedback on our library service:\n> ";
