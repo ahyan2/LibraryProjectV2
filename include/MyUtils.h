@@ -23,19 +23,17 @@ enum UserAction {
     SortByAuthor = 7    // sort catalog by author
 };
 
-extern string name;
-extern int studentID;
+class MyUtils {
+public:
+    // Reads and validates a choice [1–5], returns a UserAction
+    static UserAction getUserAction();
 
-// Reads and validates a choice [1–5], returns a UserAction
-UserAction getUserAction();
+    static int validID(int givenDigits);
 
-int validID(int givenDigits);
+    static string validFirstName();
 
-string validFirstName();
+    static char validChoice();
 
-char validChoice();
-
-
-
+};
 
 #endif

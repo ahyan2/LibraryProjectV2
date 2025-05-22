@@ -1,7 +1,7 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#include "my_utils.h"
+#include "MyUtils.h"
 #include "Book.h"
 #include "FileIO.h"
 #include <string>   // for strings
@@ -17,6 +17,9 @@ using namespace std;
 
 class Library {
 private:
+    string name;
+    int studentID;
+
     unordered_map<int, Book> catalog;    //  bookID , Book
 
     unordered_map<int, unique_ptr<Book>> checkedOutBooks;    // studentID, unique_ptr<Book>

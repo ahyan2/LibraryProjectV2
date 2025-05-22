@@ -1,4 +1,4 @@
-#include "../include/my_utils.h"
+#include "../include/MyUtils.h"
 
 #include <iostream> // for print
 #include <string>   // for strings
@@ -17,11 +17,7 @@
 using namespace std;
 
 
-string name;
-int studentID;
-
-
-int validID(int givenDigits){
+int MyUtils::validID(int givenDigits){
     int num;
     while (true){
         cin >> num;
@@ -49,7 +45,7 @@ int validID(int givenDigits){
 }
 
 
-string validFirstName(){
+string MyUtils::validFirstName(){
     string name;
     while (true) {
         getline(cin, name);
@@ -74,7 +70,7 @@ string validFirstName(){
 }
 
 
-char validChoice(){
+char MyUtils::validChoice(){
     char choice;
     while (true){
         cout << "Type 'y' for Yes, or 'n' for No." << endl;
@@ -94,7 +90,7 @@ char validChoice(){
 }
 
 
-UserAction getUserAction() {
+UserAction MyUtils::getUserAction() {
     int choice;
     while (true) {
         cout

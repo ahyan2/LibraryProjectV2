@@ -1,6 +1,7 @@
 #include "../include/Library.h"
 #include "../include/Book.h"
 #include "../include/FileIO.h"
+#include "../include/MyUtils.h"
 #include <iostream> // for print
 #include <string>   // for strings
 #include <iomanip>  // for display manip
@@ -32,17 +33,17 @@ void Library::displayWelcome(){
 
     while (true){
         cout << "What is your first name?" << endl;
-        name = validFirstName();
+        name = MyUtils::validFirstName();
 
         cout << "What is your 8-digit student ID?" << endl;
         this_thread::sleep_for(chrono::seconds(1));
         cout << "*** NOTE: A valid student ID does not start with zero (0) ***" << endl;
-        studentID = validID(8);
+        studentID = MyUtils::validID(8);
 
         cout << setw(40) << setfill('=') << " " << setfill(' ') << endl;
         cout << "Please confirm if this is your first name and SID: " << name << ", " << studentID << endl;
         this_thread::sleep_for(chrono::seconds(1));
-        char choice = validChoice();
+        char choice = MyUtils::validChoice();
         if (choice == 'y'){
             break;
         } else {
@@ -87,7 +88,7 @@ void Library::displayBooks() {
 
 void Library::displayOverview() {
     cout << "Enter the 5‑digit book ID to view its overview: ";
-    int bookID = validID(5);
+    int bookID = MyUtils::validID(5);
 
     // Check if the book is in catalog or currently checked out by this user
     bool inCatalog    = catalog.count(bookID);
@@ -123,7 +124,7 @@ void Library::checkOut() {
 
     while (true) {
         cout << "Enter the 5‑digit book ID:" << endl;
-        int bookID = validID(5);
+        int bookID = MyUtils::validID(5);
 
         auto it = catalog.find(bookID);
         if (it == catalog.end()) {
@@ -134,7 +135,7 @@ void Library::checkOut() {
         const Book &b = it->second;
         cout << "Is this the book you would like to checkout?\n"
              << "*** " << b.getTitle() << ", by " << b.getTitle() << " ***\n";
-        char choice = validChoice();
+        char choice = MyUtils::validChoice();
         if (choice == 'y') {
             // move into smart pointer map
             checkedOutBooks[studentID] = make_unique<Book>(b);
@@ -185,7 +186,7 @@ void Library::awaitingCheckIn(){
         this_thread::sleep_for(chrono::seconds(1));
         cout << "Hello " << name << " (SID " << studentID << "), your book is overdue! Please check it back in." << endl;
         cout << endl << "Would you like to check-in your book?" << endl;
-        char choice = validChoice();
+        char choice = MyUtils::validChoice();
         if (choice == 'y'){
             checkIn();
             this_thread::sleep_for(chrono::seconds(2));
@@ -235,7 +236,7 @@ void Library::showBorrowHistory() {
 
 void Library::userCatalogInteraction() {
     while (true) {
-        UserAction action = getUserAction();
+        UserAction action = MyUtils::getUserAction();
         switch (action) {
             case CheckOut:
                 checkOut();
