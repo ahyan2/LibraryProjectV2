@@ -2,6 +2,7 @@
 #define LIBRARY_H
 
 #include "my_utils.h"
+#include "Book.h"
 #include <string>   // for strings
 #include <thread>   // for time delay
 #include <vector>
@@ -11,12 +12,6 @@
 #include <algorithm>    // for sort()
 #include <map>
 
-struct Book {
-    int id;
-    string author;
-    string title;
-    string genre;
-};
 
 extern unordered_map<int, Book> catalog;    //  bookID , Book
 

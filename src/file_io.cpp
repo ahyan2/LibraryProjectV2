@@ -1,4 +1,5 @@
 #include "../include/file_io.h"
+#include "../include/Book.h"
 #include <iostream> // for print
 #include <string>   // for strings
 #include <iomanip>  // for display manip
@@ -41,20 +42,20 @@ void exportCatalog(const string &filename, bool onlyAvailable) {
     // First, list all books still in the catalog (available)
     for (auto &p : catalog) {
         const Book &b = p.second;
-        ofs << b.id << ','
-            << b.author << ','
-            << b.genre << ','
-            << b.title << ",Yes\n";
+        ofs << b.getId() << ','
+            << b.getAuthor() << ','
+            << b.getGenre() << ','
+            << b.getTitle() << ",Yes\n";
     }
 
     // Then, if requested, list checked‑out books as unavailable
     if (!onlyAvailable) {
         for (auto &p : checkedOutBooks) {
             const Book &b = *p.second;
-            ofs << b.id << ','
-                << b.author << ','
-                << b.genre << ','
-                << b.title << ",No\n";
+            ofs << b.getId() << ','
+                << b.getAuthor() << ','
+                << b.getGenre() << ','
+                << b.getTitle() << ",No\n";
         }
     }
 }
@@ -77,7 +78,8 @@ void saveCatalogBinary(const string &filename) {
         const Book &b = p.second;
 
         // Write the integer ID
-        ofs.write(reinterpret_cast<const char*>(&b.id), sizeof(b.id));
+        int id = b.getId();
+        ofs.write(reinterpret_cast<const char*>(&id), sizeof(id));
 
         // Helper to write a string: first its length, then its characters
         auto writeString = [&](const string &s){
@@ -87,9 +89,9 @@ void saveCatalogBinary(const string &filename) {
         };
 
         // Write author, title, genre
-        writeString(b.author);
-        writeString(b.title);
-        writeString(b.genre);
+        writeString(b.getAuthor());
+        writeString(b.getTitle());
+        writeString(b.getGenre());
     }
 }
 
@@ -98,7 +100,7 @@ void loadCatalogBinary(const string &filename) {
     // Open file for binary read
     ifstream ifs(filename, ios::binary);
     if (!ifs) {
-        // File doesn't exist yet—start with the default in-memory catalog
+        // File doesn't exist yet
         return;
     }
 
@@ -111,12 +113,10 @@ void loadCatalogBinary(const string &filename) {
 
     // Read each saved Book back into the map
     for (size_t i = 0; i < count; ++i) {
-        Book b;
+        // 1) Read raw data into locals
+        int id;
+        ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
 
-        // Read the integer ID
-        ifs.read(reinterpret_cast<char*>(&b.id), sizeof(b.id));
-
-        // Helper to read a string: read length then characters
         auto readString = [&](string &s){
             size_t len;
             ifs.read(reinterpret_cast<char*>(&len), sizeof(len));
@@ -124,12 +124,13 @@ void loadCatalogBinary(const string &filename) {
             ifs.read(&s[0], len);
         };
 
-        // Read author, title, genre
-        readString(b.author);
-        readString(b.title);
-        readString(b.genre);
+        string author, title, genre;
+        readString(author);
+        readString(title);
+        readString(genre);
 
-        // Reinsert into the in-memory catalog
-        catalog[b.id] = b;
+        // 2) Construct a Book and insert
+        Book b(id, author, title, genre);
+        catalog[id] = b;
     }
 }

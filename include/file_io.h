@@ -2,6 +2,7 @@
 #define FILE_IO_H
 
 #include "library.h"  // for Book, catalog, checkedOutBooks
+#include "Book.h"
 
 void saveFeedback(const string &feedback);  // Append user feedback to a text file
 

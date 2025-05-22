@@ -1,4 +1,5 @@
 #include "../include/library.h"
+#include "../include/book.h"
 #include <iostream> // for print
 #include <string>   // for strings
 #include <iomanip>  // for display manip
@@ -15,11 +16,11 @@
 using namespace std;
 
 unordered_map<int, Book> catalog = {
-    {11111, {11111, "George Orwell",   "Animal Farm",           "Satire"}},
-    {11112, {11112, "Harper Lee",      "To Kill a Mockingbird", "Historic Fiction"}},
-    {11113, {11113, "Suzanne Collins", "The Hunger Games",      "Dystopia"}},
-    {11114, {11114, "George Orwell",   "1984",                  "Dystopia"}},
-    {11115, {11115, "Andy Weir",       "The Martian",           "SciFi"}}
+    {11111, Book{11111, "George Orwell",   "Animal Farm",           "Satire"}},
+    {11112, Book{11112, "Harper Lee",      "To Kill a Mockingbird", "Historic Fiction"}},
+    {11113, Book{11113, "Suzanne Collins", "The Hunger Games",      "Dystopia"}},
+    {11114, Book{11114, "George Orwell",   "1984",                  "Dystopia"}},
+    {11115, Book{11115, "Andy Weir",       "The Martian",           "SciFi"}}
 };
 
 unordered_map<int, unique_ptr<Book>> checkedOutBooks;
@@ -80,10 +81,10 @@ void displayBooks() {
 
     for (const auto &entry : catalog) {
         const Book &b = entry.second;
-        cout << setw(10) << b.id
-             << setw(25) << b.author
-             << setw(20) << b.genre
-             << b.title << endl;
+        cout << setw(10) << b.getId()
+             << setw(25) << b.getAuthor()
+             << setw(20) << b.getGenre()
+             << b.getTitle() << endl;
     }
 }
 
@@ -94,7 +95,7 @@ void displayOverview() {
     // Check if the book is in catalog or currently checked out by this user
     bool inCatalog    = catalog.count(bookID);
     bool inCheckedOut = checkedOutBooks.count(studentID) &&
-                        checkedOutBooks[studentID]->id == bookID;
+                        checkedOutBooks[studentID]->getId() == bookID;
     if (!inCatalog && !inCheckedOut) {
         cout << "Book ID not found in catalog or your checked‑out list.\n";
         return;
@@ -135,7 +136,7 @@ void checkOut() {
 
         const Book &b = it->second;
         cout << "Is this the book you would like to checkout?\n"
-             << "*** " << b.title << ", by " << b.author << " ***\n";
+             << "*** " << b.getTitle() << ", by " << b.getTitle() << " ***\n";
         char choice = validChoice();
         if (choice == 'y') {
             // move into smart pointer map
@@ -163,7 +164,7 @@ bool checkIn() {
 
     // move book back into catalog
     unique_ptr<Book> returned = move(it->second);
-    catalog[returned->id] = *returned;
+    catalog[returned->getId()] = *returned;
     checkedOutBooks.erase(it);
 
     displayBooks();
@@ -205,7 +206,7 @@ vector<Book> getCatalogSortedByTitle() {
     }
     sort(books.begin(), books.end(),
          [](const Book &a, const Book &b) {
-             return a.title < b.title;
+             return a.getTitle() < b.getTitle();
          });
     return books;
 }
@@ -218,7 +219,7 @@ vector<Book> getCatalogSortedByAuthor() {
     }
     sort(books.begin(), books.end(),
          [](const Book &a, const Book &b) {
-             return a.author < b.author;
+             return a.getAuthor() < b.getAuthor();
          });
     return books;
 }
@@ -231,7 +232,7 @@ void showBorrowHistory() {
     } else {
         auto& b = *it->second;  // shared_ptr<Book>
         cout << "Your last borrowed book was: ["
-             << b.id << "] " << b.title << " by " << b.author << "\n";
+             << b.getId() << "] " << b.getTitle() << " by " << b.getAuthor() << "\n";
     }
 }
 
@@ -268,8 +269,8 @@ void userCatalogInteraction() {
                 auto list = getCatalogSortedByTitle();
                 cout << "\nCatalog sorted by title:\n";
                 for (auto &b : list) {
-                    cout << b.id << " | " << b.author << " | "
-                         << b.genre << " | " << b.title << "\n";
+                    cout << b.getId() << " | " << b.getAuthor() << " | "
+                         << b.getGenre() << " | " << b.getTitle() << "\n";
                 }
                 break;
             }
@@ -278,8 +279,8 @@ void userCatalogInteraction() {
                 auto list = getCatalogSortedByAuthor();
                 cout << "\nCatalog sorted by author:\n";
                 for (auto &b : list) {
-                    cout << b.id << " | " << b.author << " | "
-                         << b.genre << " | " << b.title << "\n";
+                    cout << b.getId() << " | " << b.getAuthor() << " | "
+                         << b.getGenre() << " | " << b.getTitle() << "\n";
                 }
                 break;
             }

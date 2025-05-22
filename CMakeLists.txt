@@ -16,6 +16,7 @@ add_executable(MyProjectApp
         src/my_utils.cpp
         src/library.cpp
         src/file_io.cpp
+        src/Book.cpp
 )
 target_include_directories(MyProjectApp PRIVATE include)
 
@@ -25,6 +26,7 @@ add_executable(MyProjectTests
         src/my_utils.cpp
         src/library.cpp
         src/file_io.cpp
+        src/Book.cpp
 )
 target_include_directories(MyProjectTests PRIVATE include)
 target_link_libraries(MyProjectTests gtest_main)
