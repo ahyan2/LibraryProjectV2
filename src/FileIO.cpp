@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <stdexcept>
 
 using namespace std;
 
@@ -21,8 +22,7 @@ void FileIO::saveFeedback(const string &feedback) {
     // Open feedback.txt in append mode so we don’t overwrite existing feedback
     ofstream ofs("feedback.txt", ios::app);
     if (!ofs) {
-        cout << "Error: Could not open feedback.txt for writing.\n";
-        return;  // Early return on file open failure
+        throw runtime_error("Could not open feedback.txt for writing");
     }
     ofs << feedback << "\n";  // Write the user's feedback, followed by a newline
 }
@@ -33,8 +33,7 @@ void FileIO::exportCatalog(const string &filename, const unordered_map<int, Book
     // Open the given filename for text output (overwrites existing file)
     ofstream ofs(filename);
     if (!ofs) {
-        cout << "Error: Could not open " << filename << " for writing.\n";
-        return;  // Abort if file can't be created
+        throw runtime_error("Could not open " + filename + " for writing");
     }
 
     // Write a header row for CSV format
@@ -66,8 +65,7 @@ void FileIO::saveCatalogBinary(const string &filename, const unordered_map<int, 
     // Open file in binary mode
     ofstream ofs(filename, ios::binary);
     if (!ofs) {
-        cout << "Error: Could not open " << filename << " for binary write.\n";
-        return;
+        throw runtime_error("Could not open " + filename + " for binary write");
     }
 
     // First write the number of Book entries
@@ -108,6 +106,9 @@ void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, Book> 
     // Read how many Book entries were saved
     size_t count;
     ifs.read(reinterpret_cast<char*>(&count), sizeof(count));
+    if (ifs.fail()) {   // after reading count
+        throw runtime_error("Failed to read catalog size from " + filename);
+    }
 
     // Clear any existing in-memory catalog
     catalog.clear();
@@ -117,12 +118,21 @@ void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, Book> 
         // 1) Read raw data into locals
         int id;
         ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
+        if (ifs.fail()) {   // after reading count
+            throw runtime_error("Failed to read book ID from " + filename);
+        }
 
         auto readString = [&](string &s){
             size_t len;
             ifs.read(reinterpret_cast<char*>(&len), sizeof(len));
+            if (ifs.fail()) {   // after reading count
+                throw runtime_error("Failed to read string length from " + filename);
+            }
             s.resize(len);
             ifs.read(&s[0], len);
+            if (ifs.fail()) {   // after reading count
+                throw runtime_error("Failed to read string data from " + filename);
+            }
         };
 
         string author, title, genre;

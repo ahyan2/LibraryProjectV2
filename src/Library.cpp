@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <stdexcept>
 
 using namespace std;
 
@@ -288,17 +289,33 @@ void Library::userCatalogInteraction() {
 }
 
 void Library::loadCatalogBinary(const string& filename) {
-    FileIO::loadCatalogBinary(filename, catalog);
+    try {
+        FileIO::loadCatalogBinary(filename, catalog);
+    } catch (const exception& e) {
+        cerr << "Warning: could not load catalog: " << e.what() << "\n";
+    }
 }
 
 void Library::saveCatalogBinary(const string& filename) {
-    FileIO::saveCatalogBinary(filename, catalog);
+    try {
+        FileIO::saveCatalogBinary(filename, catalog);
+    } catch (const exception& e) {
+        cerr << "Error: failed to save catalog: " << e.what() << "\n";
+    }
 }
 
 void Library::saveFeedback(const string& feedback) {
-    FileIO::saveFeedback(feedback);
+    try {
+        FileIO::saveFeedback(feedback);
+    } catch (const exception& e) {
+        cerr << "Error: could not save feedback: " << e.what() << "\n";
+    }
 }
 
 void Library::exportCatalog(const string& filename, bool onlyAvailable) {
-    FileIO::exportCatalog(filename, catalog, checkedOutBooks, onlyAvailable);
+    try {
+        FileIO::exportCatalog(filename, catalog, checkedOutBooks, onlyAvailable);
+    } catch (const exception& e) {
+        cerr << "Error: could not export catalog: " << e.what() << "\n";
+    }
 }

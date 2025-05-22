@@ -4,6 +4,7 @@
 #include "Library.h"  // for Book, catalog, checkedOutBooks
 #include "Book.h"
 #include <unordered_map>
+#include <stdexcept>
 
 using namespace std;
 

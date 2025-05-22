@@ -12,6 +12,7 @@
 #include <fstream>
 #include <algorithm>    // for sort()
 #include <map>
+#include <stdexcept>
 
 using namespace std;
 
