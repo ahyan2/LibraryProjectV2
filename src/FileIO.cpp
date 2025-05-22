@@ -1,4 +1,4 @@
-#include "../include/file_io.h"
+#include "../include/FileIO.h"
 #include "../include/Book.h"
 #include <iostream> // for print
 #include <string>   // for strings
@@ -17,7 +17,7 @@ using namespace std;
 
 
 // Append user feedback to a text file
-void saveFeedback(const string &feedback) {
+void FileIO::saveFeedback(const string &feedback) {
     // Open feedback.txt in append mode so we don’t overwrite existing feedback
     ofstream ofs("feedback.txt", ios::app);
     if (!ofs) {
@@ -28,7 +28,8 @@ void saveFeedback(const string &feedback) {
 }
 
 // Export catalog to CSV/TXT
-void exportCatalog(const string &filename, bool onlyAvailable) {
+void FileIO::exportCatalog(const string &filename, const unordered_map<int, Book> &catalog,
+                            const unordered_map<int, unique_ptr<Book>> &checkedOut, bool onlyAvailable) {
     // Open the given filename for text output (overwrites existing file)
     ofstream ofs(filename);
     if (!ofs) {
@@ -50,7 +51,7 @@ void exportCatalog(const string &filename, bool onlyAvailable) {
 
     // Then, if requested, list checked‑out books as unavailable
     if (!onlyAvailable) {
-        for (auto &p : checkedOutBooks) {
+        for (auto &p : checkedOut) {
             const Book &b = *p.second;
             ofs << b.getId() << ','
                 << b.getAuthor() << ','
@@ -61,7 +62,7 @@ void exportCatalog(const string &filename, bool onlyAvailable) {
 }
 
 // Save current catalog to a binary file for efficient storage
-void saveCatalogBinary(const string &filename) {
+void FileIO::saveCatalogBinary(const string &filename, const unordered_map<int, Book> &catalog) {
     // Open file in binary mode
     ofstream ofs(filename, ios::binary);
     if (!ofs) {
@@ -96,7 +97,7 @@ void saveCatalogBinary(const string &filename) {
 }
 
 // Load catalog from a binary file on startup
-void loadCatalogBinary(const string &filename) {
+void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, Book> &catalog) {
     // Open file for binary read
     ifstream ifs(filename, ios::binary);
     if (!ifs) {

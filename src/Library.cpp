@@ -1,5 +1,6 @@
 #include "../include/Library.h"
 #include "../include/Book.h"
+#include "../include/FileIO.h"
 #include <iostream> // for print
 #include <string>   // for strings
 #include <iomanip>  // for display manip
@@ -283,4 +284,20 @@ void Library::userCatalogInteraction() {
         }
         this_thread::sleep_for(chrono::seconds(1));
     }
+}
+
+void Library::loadCatalogBinary(const string& filename) {
+    FileIO::loadCatalogBinary(filename, catalog);
+}
+
+void Library::saveCatalogBinary(const string& filename) {
+    FileIO::saveCatalogBinary(filename, catalog);
+}
+
+void Library::saveFeedback(const string& feedback) {
+    FileIO::saveFeedback(feedback);
+}
+
+void Library::exportCatalog(const string& filename, bool onlyAvailable) {
+    FileIO::exportCatalog(filename, catalog, checkedOutBooks, onlyAvailable);
 }

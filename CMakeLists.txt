@@ -15,7 +15,7 @@ add_executable(MyProjectApp
         main.cpp
         src/my_utils.cpp
         src/Library.cpp
-        src/file_io.cpp
+        src/FileIO.cpp
         src/Book.cpp
 )
 target_include_directories(MyProjectApp PRIVATE include)
@@ -25,7 +25,7 @@ add_executable(MyProjectTests
         test/my_utils_tests.cpp
         src/my_utils.cpp
         src/Library.cpp
-        src/file_io.cpp
+        src/FileIO.cpp
         src/Book.cpp
 )
 target_include_directories(MyProjectTests PRIVATE include)

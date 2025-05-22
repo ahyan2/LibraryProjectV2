@@ -3,6 +3,7 @@
 
 #include "my_utils.h"
 #include "Book.h"
+#include "FileIO.h"
 #include <string>   // for strings
 #include <thread>   // for time delay
 #include <vector>
@@ -11,6 +12,8 @@
 #include <fstream>
 #include <algorithm>    // for sort()
 #include <map>
+
+using namespace std;
 
 class Library {
 private:
@@ -44,6 +47,12 @@ public:
     bool checkIn();
 
     void awaitingCheckIn();
+
+    // IO wrapper functions
+    void loadCatalogBinary(const string& filename);
+    void saveCatalogBinary(const string& filename);
+    void saveFeedback(const string& feedback);
+    void exportCatalog(const string& filename, bool onlyAvailable);
 
 };
 
