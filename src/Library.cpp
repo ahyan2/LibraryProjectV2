@@ -1,5 +1,6 @@
 #include "../include/Library.h"
 #include "../include/Book.h"
+#include "../include/LibraryItem.h"
 #include "../include/FileIO.h"
 #include "../include/MyUtils.h"
 #include <iostream> // for print
@@ -18,14 +19,14 @@
 
 using namespace std;
 
-Library::Library() : catalog{
-        {11111, Book{11111, "George Orwell",   "Animal Farm",           "Satire"}},
-        {11112, Book{11112, "Harper Lee",      "To Kill a Mockingbird", "Historic Fiction"}},
-        {11113, Book{11113, "Suzanne Collins", "The Hunger Games",      "Dystopia"}},
-        {11114, Book{11114, "George Orwell",   "1984",                  "Dystopia"}},
-        {11115, Book{11115, "Andy Weir",       "The Martian",           "SciFi"}}
-    }
-{}
+Library::Library() : catalog()    // start with an empty map
+{
+    catalog.emplace(11111, make_unique<Book>(11111, "George Orwell", "Animal Farm", "Satire"));
+    catalog.emplace(11112, make_unique<Book>(11112, "Harper Lee", "To Kill a Mockingbird", "Historic Fiction"));
+    catalog.emplace(11113, make_unique<Book>(11113, "Suzanne Collins", "The Hunger Games", "Dystopia"));
+    catalog.emplace(11114, make_unique<Book>(11114, "George Orwell", "1984", "Dystopia"));
+    catalog.emplace(11115, make_unique<Book>(11115, "Andy Weir", "The Martian", "SciFi"));
+}
 
 void Library::displayWelcome(){
     cout << setw(40) << setfill('=') << " " << setfill(' ') << endl;
@@ -79,11 +80,8 @@ void Library::displayBooks() {
     cout << setw(80) << setfill('-') << "" << setfill(' ') << endl;
 
     for (const auto &entry : catalog) {
-        const Book &b = entry.second;
-        cout << setw(10) << b.getId()
-             << setw(25) << b.getAuthor()
-             << setw(20) << b.getGenre()
-             << b.getTitle() << endl;
+        LibraryItem &item = *entry.second;
+        cout << item.summary() << endl;
     }
 }
 
@@ -133,16 +131,18 @@ void Library::checkOut() {
             continue;
         }
 
-        const Book &b = it->second;
+        LibraryItem &item = *it->second;
+        cout << "*** " << item.summary() << " ***\n";
         cout << "Is this the book you would like to checkout?\n"
-             << "*** " << b.getTitle() << ", by " << b.getTitle() << " ***\n";
+             << "*** " << item.summary() << " ***\n";
         char choice = MyUtils::validChoice();
         if (choice == 'y') {
             // move into smart pointer map
-            checkedOutBooks[studentID] = make_unique<Book>(b);
+            checkedOutBooks[studentID] = std::move(it->second);
 
             // record into borrowHistory as a shared_ptr
-            borrowHistory[studentID] = make_shared<Book>(b);
+            borrowHistory[studentID] = std::shared_ptr<LibraryItem>(checkedOutBooks[studentID].get(), [](LibraryItem*){}  // no double delete
+    );
             showBorrowHistory();
 
             catalog.erase(it);
@@ -162,8 +162,9 @@ bool Library::checkIn() {
     }
 
     // move book back into catalog
-    unique_ptr<Book> returned = move(it->second);
-    catalog[returned->getId()] = *returned;
+    unique_ptr<LibraryItem> returned = move(it->second);
+    int id = returned->getId();
+    catalog.emplace(id, std::move(returned));
     checkedOutBooks.erase(it);
 
     displayBooks();
@@ -197,31 +198,35 @@ void Library::awaitingCheckIn(){
     }
 }
 
-vector<Book> Library::getCatalogSortedByTitle() {
-    vector<Book> books;
-    books.reserve(catalog.size());
+vector<LibraryItem*> Library::getCatalogSortedByTitle() const {
+    vector<LibraryItem*> items;
+    items.reserve(catalog.size());
     for (auto &p : catalog) {
-        books.push_back(p.second);
+        items.push_back(p.second.get());
     }
-    sort(books.begin(), books.end(),
-         [](const Book &a, const Book &b) {
-             return a.getTitle() < b.getTitle();
+    sort(items.begin(), items.end(),
+         [](LibraryItem* a, LibraryItem* b) {
+             return a->summary() < b->summary();  // or compare titles if you add a getTitle() accessor
          });
-    return books;
+    return items;
 }
 
-vector<Book> Library::getCatalogSortedByAuthor() {
-    vector<Book> books;
-    books.reserve(catalog.size());
+
+vector<LibraryItem*> Library::getCatalogSortedByAuthor() const {
+    vector<LibraryItem*> items;
+    items.reserve(catalog.size());
     for (auto &p : catalog) {
-        books.push_back(p.second);
+        items.push_back(p.second.get());
     }
-    sort(books.begin(), books.end(),
-         [](const Book &a, const Book &b) {
-             return a.getAuthor() < b.getAuthor();
+    sort(items.begin(), items.end(),
+         [](LibraryItem* a, LibraryItem* b) {
+             // downcast if you need author specifically:
+             return dynamic_cast<Book*>(a)->getAuthor()
+                  < dynamic_cast<Book*>(b)->getAuthor();
          });
-    return books;
+    return items;
 }
+
 
 void Library::showBorrowHistory() {
     // If this user has borrowed before, print the last one
@@ -229,9 +234,8 @@ void Library::showBorrowHistory() {
     if (it == borrowHistory.end()) {
         cout << "You have no borrow history.\n";
     } else {
-        auto& b = *it->second;  // shared_ptr<Book>
-        cout << "Your last borrowed book was: ["
-             << b.getId() << "] " << b.getTitle() << " by " << b.getAuthor() << "\n";
+        LibraryItem &item = *it->second;
+        cout << "Your last borrowed book was: " << item.summary() << "\n";
     }
 }
 
@@ -267,19 +271,18 @@ void Library::userCatalogInteraction() {
             case SortByTitle: {
                 auto list = getCatalogSortedByTitle();
                 cout << "\nCatalog sorted by title:\n";
-                for (auto &b : list) {
-                    cout << b.getId() << " | " << b.getAuthor() << " | "
-                         << b.getGenre() << " | " << b.getTitle() << "\n";
+                for (LibraryItem* item : list) {
+                    cout << item->summary() << "\n";
                 }
+
                 break;
             }
 
             case SortByAuthor: {
                 auto list = getCatalogSortedByAuthor();
                 cout << "\nCatalog sorted by author:\n";
-                for (auto &b : list) {
-                    cout << b.getId() << " | " << b.getAuthor() << " | "
-                         << b.getGenre() << " | " << b.getTitle() << "\n";
+                for (LibraryItem* item : list) {
+                    cout << item->summary() << "\n";
                 }
                 break;
             }

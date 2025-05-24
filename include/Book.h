@@ -2,9 +2,10 @@
 #define BOOK_H
 
 #include <string>
+#include "LibraryItem.h"
 using namespace std;
 
-class Book {
+class Book : public LibraryItem {
 private:
     int    id;
     string author;
@@ -20,10 +21,12 @@ public:
          const string& genre);
 
     // 2) getters
-    int    getId()    const;
     string getAuthor() const;
     string getTitle()  const;
     string getGenre()  const;
+    int getId() const override; // from LibraryItem override
+
+    string summary() const override;
 };
 
 #endif

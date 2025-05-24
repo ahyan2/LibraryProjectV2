@@ -28,8 +28,8 @@ void FileIO::saveFeedback(const string &feedback) {
 }
 
 // Export catalog to CSV/TXT
-void FileIO::exportCatalog(const string &filename, const unordered_map<int, Book> &catalog,
-                            const unordered_map<int, unique_ptr<Book>> &checkedOut, bool onlyAvailable) {
+void FileIO::exportCatalog(const string &filename, const unordered_map<int, unique_ptr<LibraryItem>> &catalog,
+                            const unordered_map<int, unique_ptr<LibraryItem>> &checkedOut, bool onlyAvailable) {
     // Open the given filename for text output (overwrites existing file)
     ofstream ofs(filename);
     if (!ofs) {
@@ -41,61 +41,65 @@ void FileIO::exportCatalog(const string &filename, const unordered_map<int, Book
 
     // First, list all books still in the catalog (available)
     for (auto &p : catalog) {
-        const Book &b = p.second;
-        ofs << b.getId() << ','
-            << b.getAuthor() << ','
-            << b.getGenre() << ','
-            << b.getTitle() << ",Yes\n";
+        // downcast to Book to access fields
+        Book* b = dynamic_cast<Book*>(p.second.get());
+        if (!b) continue; // skip non-Book items
+        ofs << b->getId() << ','
+            << b->getAuthor() << ','
+            << b->getGenre() << ','
+            << b->getTitle() << ",Yes\n";
     }
 
     // Then, if requested, list checked‑out books as unavailable
     if (!onlyAvailable) {
         for (auto &p : checkedOut) {
-            const Book &b = *p.second;
-            ofs << b.getId() << ','
-                << b.getAuthor() << ','
-                << b.getGenre() << ','
-                << b.getTitle() << ",No\n";
+            Book* b = dynamic_cast<Book*>(p.second.get());
+            if (!b) continue;
+            ofs << b->getId() << ','
+                << b->getAuthor() << ','
+                << b->getGenre() << ','
+                << b->getTitle() << ",No\n";
         }
     }
 }
 
 // Save current catalog to a binary file for efficient storage
-void FileIO::saveCatalogBinary(const string &filename, const unordered_map<int, Book> &catalog) {
-    // Open file in binary mode
+void FileIO::saveCatalogBinary(const string &filename,
+    const unordered_map<int, unique_ptr<LibraryItem>>& catalog)
+{
     ofstream ofs(filename, ios::binary);
-    if (!ofs) {
-        throw runtime_error("Could not open " + filename + " for binary write");
-    }
+    if (!ofs) throw runtime_error("Could not open " + filename + " for binary write");
 
-    // First write the number of Book entries
+    // write count
     size_t count = catalog.size();
     ofs.write(reinterpret_cast<const char*>(&count), sizeof(count));
 
-    // Then write each Book’s data
+    // then write each Book’s data by down-casting
     for (auto &p : catalog) {
-        const Book &b = p.second;
+        Book* b = dynamic_cast<Book*>(p.second.get());
+        if (!b) continue;  // skip non-Book items
 
-        // Write the integer ID
-        int id = b.getId();
+        // write integer ID
+        int id = b->getId();
         ofs.write(reinterpret_cast<const char*>(&id), sizeof(id));
 
-        // Helper to write a string: first its length, then its characters
+        // helper for strings
         auto writeString = [&](const string &s){
             size_t len = s.size();
             ofs.write(reinterpret_cast<const char*>(&len), sizeof(len));
             ofs.write(s.data(), len);
         };
 
-        // Write author, title, genre
-        writeString(b.getAuthor());
-        writeString(b.getTitle());
-        writeString(b.getGenre());
+        // write author, title, genre
+        writeString(b->getAuthor());
+        writeString(b->getTitle());
+        writeString(b->getGenre());
     }
 }
 
+
 // Load catalog from a binary file on startup
-void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, Book> &catalog) {
+void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, unique_ptr<LibraryItem>> &catalog) {
     // Open file for binary read
     ifstream ifs(filename, ios::binary);
     if (!ifs) {
@@ -142,6 +146,6 @@ void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, Book> 
 
         // 2) Construct a Book and insert
         Book b(id, author, title, genre);
-        catalog[id] = b;
+        catalog[id] = make_unique<Book>(id, author, title, genre);
     }
 }

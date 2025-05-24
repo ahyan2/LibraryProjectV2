@@ -1,5 +1,5 @@
-#ifndef MY_UTILS_H
-#define MY_UTILS_H
+#ifndef MYUTILS_H
+#define MYUTILS_H
 
 #include <string>   // for strings
 #include <thread>   // for time delay

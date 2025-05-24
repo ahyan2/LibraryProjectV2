@@ -1,5 +1,5 @@
-#ifndef FILE_IO_H
-#define FILE_IO_H
+#ifndef FILEIO_H
+#define FILEIO_H
 
 #include "Library.h"  // for Book, catalog, checkedOutBooks
 #include "Book.h"
@@ -14,14 +14,14 @@ public:
     static void saveFeedback(const string &feedback);  // Append user feedback to a text file
 
     static void exportCatalog(const string &filename,
-                        const unordered_map<int, Book>& catalog,
-                        const unordered_map<int, unique_ptr<Book>>& checkedOut,
+                        const unordered_map<int, unique_ptr<LibraryItem>> &catalog,
+                        const unordered_map<int, unique_ptr<LibraryItem>>& checkedOut,
                         bool onlyAvailable); // Export catalog to CSV/TXT (all or only available)
 
-    static void saveCatalogBinary(const string &filename, const unordered_map<int, Book>& catalog);     // Save current catalog to a binary file
+    static void saveCatalogBinary(const string &filename, const unordered_map<int, unique_ptr<LibraryItem>> &catalog);     // Save current catalog to a binary file
 
-    static void loadCatalogBinary(const string &filename, unordered_map<int, Book>& catalog);
+    static void loadCatalogBinary(const string &filename, unordered_map<int, unique_ptr<LibraryItem>> &catalog);
 
 };
 
-#endif //FILE_IO_H
+#endif

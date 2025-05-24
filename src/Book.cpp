@@ -26,3 +26,7 @@ string Book::getTitle() const {
 string Book::getGenre() const {
     return genre;
 }
+
+string Book::summary() const {
+    return "[" + to_string(id) + "] \"" + title + "\" by " + author + "\" [ " + genre + "]";
+}

@@ -4,6 +4,8 @@
 #include "MyUtils.h"
 #include "Book.h"
 #include "FileIO.h"
+#include "Library.h"
+#include "LibraryItem.h"
 #include <string>   // for strings
 #include <thread>   // for time delay
 #include <vector>
@@ -21,11 +23,11 @@ private:
     string name;
     int studentID;
 
-    unordered_map<int, Book> catalog;    //  bookID , Book
+    unordered_map<int, unique_ptr<LibraryItem>> catalog;    //  bookID , Book
 
-    unordered_map<int, unique_ptr<Book>> checkedOutBooks;    // studentID, unique_ptr<Book>
+    unordered_map<int, unique_ptr<LibraryItem>> checkedOutBooks;    // studentID, unique_ptr<Book>
 
-    map<int, shared_ptr<Book>> borrowHistory;   // borrow history by studentID, keeps a shared_ptr to each Book
+    map<int, shared_ptr<LibraryItem>> borrowHistory;   // borrow history by studentID, keeps a shared_ptr to each Book
 
 public:
     Library();  // default constructor
@@ -38,9 +40,9 @@ public:
 
     void displayBooks();
 
-    vector<Book> getCatalogSortedByTitle();
+    vector<LibraryItem*> getCatalogSortedByTitle() const;
 
-    vector<Book> getCatalogSortedByAuthor();
+    vector<LibraryItem*> getCatalogSortedByAuthor() const;
 
     void showBorrowHistory();   // each user’s last borrowed book
 
