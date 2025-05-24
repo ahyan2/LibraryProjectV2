@@ -15,7 +15,16 @@ string ReferenceBook::getGenre() const noexcept {
     return genre;
 }
 
+string ReferenceBook::getAuthor() const noexcept {
+    return author;
+}
+
+string ReferenceBook::getTitle() const noexcept {
+    return title;
+}
+
+
 string ReferenceBook::summary() const {
-    return "[" + to_string(id) + "] \"" + title +
-           "\" by " + author + " (Ref on " + genre + ")";
+    return "[" + to_string(getId()) + "] \"" + getTitle() +
+           "\" by " + getAuthor() + " (Ref on " + getGenre() + ")";
 }

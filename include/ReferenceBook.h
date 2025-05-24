@@ -17,6 +17,8 @@ public:
     int getId() const override;
     string summary()  const override;
     string getGenre() const noexcept;
+    string getAuthor() const noexcept;
+    string getTitle() const noexcept;
 };
 
 
