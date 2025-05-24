@@ -28,5 +28,10 @@ string Book::getGenre() const {
 }
 
 string Book::summary() const {
-    return "[" + to_string(id) + "] \"" + title + "\" by " + author + "\" [ " + genre + "]";
+    // [ID] "Title" by Author [Genre]
+    return "[" + std::to_string(getId()) + "] \""
+         + getTitle() + "\" by "
+         + getAuthor() + " ["
+         + getGenre() + "]";
 }
+

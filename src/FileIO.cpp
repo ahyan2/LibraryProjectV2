@@ -99,53 +99,44 @@ void FileIO::saveCatalogBinary(const string &filename,
 
 
 // Load catalog from a binary file on startup
-void FileIO::loadCatalogBinary(const string &filename, unordered_map<int, unique_ptr<LibraryItem>> &catalog) {
-    // Open file for binary read
+void FileIO::loadCatalogBinary(const string &filename,
+    unordered_map<int, unique_ptr<LibraryItem>> &catalog)
+{
     ifstream ifs(filename, ios::binary);
-    if (!ifs) {
-        // File doesn't exist yet
+    if (!ifs)
+        return;   // no file = seed defaults
+
+    // skip zero‑length files
+    if (std::filesystem::file_size(filename) == 0)
         return;
-    }
 
-    // Read how many Book entries were saved
-    size_t count;
+    size_t count = 0;
     ifs.read(reinterpret_cast<char*>(&count), sizeof(count));
-    if (ifs.fail()) {   // after reading count
-        throw runtime_error("Failed to read catalog size from " + filename);
-    }
+    if (ifs.fail())
+        return;   // silently give up
 
-    // Clear any existing in-memory catalog
-    catalog.clear();
-
-    // Read each saved Book back into the map
     for (size_t i = 0; i < count; ++i) {
-        // 1) Read raw data into locals
         int id;
         ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
-        if (ifs.fail()) {   // after reading count
-            throw runtime_error("Failed to read book ID from " + filename);
-        }
+        if (ifs.fail())
+            return;  // silent bad‑format exit
 
+        // helper to read strings
         auto readString = [&](string &s){
             size_t len;
             ifs.read(reinterpret_cast<char*>(&len), sizeof(len));
-            if (ifs.fail()) {   // after reading count
-                throw runtime_error("Failed to read string length from " + filename);
-            }
+            if (ifs.fail()) return false;
             s.resize(len);
             ifs.read(&s[0], len);
-            if (ifs.fail()) {   // after reading count
-                throw runtime_error("Failed to read string data from " + filename);
-            }
+            return !ifs.fail();
         };
 
         string author, title, genre;
-        readString(author);
-        readString(title);
-        readString(genre);
+        if (!readString(author) || !readString(title) || !readString(genre))
+            return;
 
-        // 2) Construct a Book and insert
-        Book b(id, author, title, genre);
+        // insert back (overwrites seeded items with same ID)
         catalog[id] = make_unique<Book>(id, author, title, genre);
     }
 }
+

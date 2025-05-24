@@ -6,6 +6,7 @@
 #include "FileIO.h"
 #include "Library.h"
 #include "LibraryItem.h"
+#include "../include/ReferenceBook.h"
 #include <string>   // for strings
 #include <thread>   // for time delay
 #include <vector>
@@ -59,6 +60,8 @@ public:
     void saveCatalogBinary(const string& filename);
     void saveFeedback(const string& feedback);
     void exportCatalog(const string& filename, bool onlyAvailable);
+
+    vector<LibraryItem*> getCatalogSortedById() const;
 
 };
 

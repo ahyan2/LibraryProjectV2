@@ -3,6 +3,7 @@
 #include "../include/LibraryItem.h"
 #include "../include/FileIO.h"
 #include "../include/MyUtils.h"
+#include "../include/ReferenceBook.h"
 #include <iostream> // for print
 #include <string>   // for strings
 #include <iomanip>  // for display manip
@@ -21,11 +22,14 @@ using namespace std;
 
 Library::Library() : catalog()    // start with an empty map
 {
-    catalog.emplace(11111, make_unique<Book>(11111, "George Orwell", "Animal Farm", "Satire"));
-    catalog.emplace(11112, make_unique<Book>(11112, "Harper Lee", "To Kill a Mockingbird", "Historic Fiction"));
-    catalog.emplace(11113, make_unique<Book>(11113, "Suzanne Collins", "The Hunger Games", "Dystopia"));
-    catalog.emplace(11114, make_unique<Book>(11114, "George Orwell", "1984", "Dystopia"));
-    catalog.emplace(11115, make_unique<Book>(11115, "Andy Weir", "The Martian", "SciFi"));
+    catalog.emplace(10001, make_unique<Book>(10001, "George Orwell", "Animal Farm", "Satire"));
+    catalog.emplace(10002, make_unique<Book>(10002, "Harper Lee", "To Kill a Mockingbird", "Historic Fiction"));
+    catalog.emplace(10003, make_unique<Book>(10003, "Suzanne Collins", "The Hunger Games", "Dystopia"));
+    catalog.emplace(10004, make_unique<Book>(10004, "George Orwell", "1984", "Dystopia"));
+    catalog.emplace(10005, make_unique<Book>(10005, "Andy Weir", "The Martian", "SciFi"));
+
+    catalog.emplace(20001, make_unique<ReferenceBook>(20001, "Dr. Jane Foster", "Encyclopedia of Science", "Science"));
+    catalog.emplace(20002, make_unique<ReferenceBook>(20002, "Oxford University Press", "Oxford English Dictionary", "Language"));
 }
 
 void Library::displayWelcome(){
@@ -79,9 +83,8 @@ void Library::displayBooks() {
                   << "Title" << endl;
     cout << setw(80) << setfill('-') << "" << setfill(' ') << endl;
 
-    for (const auto &entry : catalog) {
-        LibraryItem &item = *entry.second;
-        cout << item.summary() << endl;
+    for (LibraryItem* item : getCatalogSortedById()) {
+        cout << item->summary() << endl;
     }
 }
 
@@ -141,7 +144,7 @@ void Library::checkOut() {
             checkedOutBooks[studentID] = std::move(it->second);
 
             // record into borrowHistory as a shared_ptr
-            borrowHistory[studentID] = std::shared_ptr<LibraryItem>(checkedOutBooks[studentID].get(), [](LibraryItem*){}  // no double delete
+            borrowHistory[studentID] = shared_ptr<LibraryItem>(checkedOutBooks[studentID].get(), [](LibraryItem*){}  // no double delete
     );
             showBorrowHistory();
 
@@ -201,15 +204,18 @@ void Library::awaitingCheckIn(){
 vector<LibraryItem*> Library::getCatalogSortedByTitle() const {
     vector<LibraryItem*> items;
     items.reserve(catalog.size());
+    // collect every polymorphic item
     for (auto &p : catalog) {
         items.push_back(p.second.get());
     }
+    // sort by summary (which for Book or ReferenceBook begins with the title or ID)
     sort(items.begin(), items.end(),
          [](LibraryItem* a, LibraryItem* b) {
-             return a->summary() < b->summary();  // or compare titles if you add a getTitle() accessor
+             return a->summary() < b->summary();
          });
     return items;
 }
+
 
 
 vector<LibraryItem*> Library::getCatalogSortedByAuthor() const {
@@ -218,14 +224,25 @@ vector<LibraryItem*> Library::getCatalogSortedByAuthor() const {
     for (auto &p : catalog) {
         items.push_back(p.second.get());
     }
+    // sort by author—downcast to Book or ReferenceBook to fetch author field
     sort(items.begin(), items.end(),
          [](LibraryItem* a, LibraryItem* b) {
-             // downcast if you need author specifically:
-             return dynamic_cast<Book*>(a)->getAuthor()
-                  < dynamic_cast<Book*>(b)->getAuthor();
+             // both Book and ReferenceBook have getAuthor() or equivalent
+             // first try Book, then ReferenceBook
+             if (auto ba = dynamic_cast<Book*>(a)) {
+                 if (auto bb = dynamic_cast<Book*>(b))
+                     return ba->getAuthor() < bb->getAuthor();
+             }
+             if (auto ra = dynamic_cast<ReferenceBook*>(a)) {
+                 if (auto rb = dynamic_cast<ReferenceBook*>(b))
+                     return ra->getGenre() < rb->getGenre();
+             }
+             // fallback: summary comparison
+             return a->summary() < b->summary();
          });
     return items;
 }
+
 
 
 void Library::showBorrowHistory() {
@@ -264,6 +281,9 @@ void Library::userCatalogInteraction() {
                 if (checkedOutBooks.count(studentID)) {
                     cout << "You still have a book checked out. Please return it before exiting.\n";
                     break;
+                }
+                for (LibraryItem* item : getCatalogSortedById()) {  // sorting by ID before leaving program
+                    cout << item->summary() << "\n";
                 }
                 displayGoodbye();
                 return;
@@ -321,4 +341,18 @@ void Library::exportCatalog(const string& filename, bool onlyAvailable) {
     } catch (const exception& e) {
         cerr << "Error: could not export catalog: " << e.what() << "\n";
     }
+}
+
+
+vector<LibraryItem*> Library::getCatalogSortedById() const {
+    vector<LibraryItem*> items;
+    items.reserve(catalog.size());
+    for (auto &p : catalog) {
+        items.push_back(p.second.get());
+    }
+    sort(items.begin(), items.end(),
+         [](LibraryItem* a, LibraryItem* b) {
+             return a->getId() < b->getId();
+         });
+    return items;
 }
