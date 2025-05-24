@@ -1,6 +1,6 @@
 # UPDATE: Project 3 Code Restructuring
 
-
+Project 3 Video: https://drive.google.com/drive/folders/1NjX9XAXi2ObgMJPmzu19QfnqYzwGFIXO
 
 
 Overview: A C++ interactive library catalog that uses advanced data structures, 
